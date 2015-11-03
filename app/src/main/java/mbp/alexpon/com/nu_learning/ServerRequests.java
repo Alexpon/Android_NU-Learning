@@ -47,9 +47,9 @@ public class ServerRequests {
         new fetchUserDataAsyncTask(user, callback).execute();
     }
 
-    public void storeRosterDataInBackground(User user, DateTime dateTime, GetUserCallBack userCallback) {
+    public void storeRosterDataInBackground(User user, DateTime dateTime, String class_name, GetUserCallBack userCallback) {
         progressDialog.show();
-        new storeRosterDataAsyncTask(user, dateTime, userCallback).execute();
+        new storeRosterDataAsyncTask(user, dateTime, class_name, userCallback).execute();
     }
 
     public void fetchTeacherQuizInBackground(String teacherId, GetSwitcherCallBack callback) {
@@ -169,20 +169,23 @@ public class ServerRequests {
     public class storeRosterDataAsyncTask extends AsyncTask<Void, Void, Void> {
         User user;
         DateTime dateTime;
+        String class_name;
         GetUserCallBack userCallBack;
 
-        public storeRosterDataAsyncTask(User user, DateTime dateTime, GetUserCallBack userCallback) {
+        public storeRosterDataAsyncTask(User user, DateTime dateTime, String class_name, GetUserCallBack userCallback) {
             this.user = user;
             this.dateTime = dateTime;
             this.userCallBack = userCallback;
+            this.class_name = class_name;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             ArrayList<NameValuePair> dataToSend = new ArrayList<>();
-            dataToSend.add(new BasicNameValuePair("name", user.getName()));
+            dataToSend.add(new BasicNameValuePair("student_name", user.getName()));
             dataToSend.add(new BasicNameValuePair("student_id", user.getUsername()));
             dataToSend.add(new BasicNameValuePair("department", user.getDepartment()));
+            dataToSend.add(new BasicNameValuePair("class_name", class_name));
             dataToSend.add(new BasicNameValuePair("year", dateTime.year + ""));
             dataToSend.add(new BasicNameValuePair("month", dateTime.month + ""));
             dataToSend.add(new BasicNameValuePair("date", dateTime.date + ""));

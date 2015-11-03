@@ -29,6 +29,10 @@ public class MainActivity extends Activity {
 
 
     public static final String TAG = "NfcDemo";
+    public static final String RosterCard1 = "EDF5A050";
+    public static final String RosterCard2 = "0D7D9D50";
+    public String class_name = "";
+
     private NfcAdapter mNfcAdapter;
     private Button btn_GL;
     private Button btn_setup;
@@ -152,7 +156,7 @@ public class MainActivity extends Activity {
         DateTime dateTime = new DateTime(year, month, date, hour, minute, second);
 
         ServerRequests serverRequests = new ServerRequests(this);
-        serverRequests.storeRosterDataInBackground(user, dateTime, new GetUserCallBack() {
+        serverRequests.storeRosterDataInBackground(user, dateTime, class_name, new GetUserCallBack() {
             @Override
             public void done(User returnedUser) {
                 Toast.makeText(getApplicationContext(), "Roster Success!", Toast.LENGTH_SHORT).show();
@@ -220,8 +224,12 @@ public class MainActivity extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         //resolveIntent(intent);
-        Toast.makeText(this, ByteArrayToHexString(intent.getByteArrayExtra(mNfcAdapter.EXTRA_ID)), Toast.LENGTH_LONG).show();
-        showAlertDialog();
+        String cardID = ByteArrayToHexString(intent.getByteArrayExtra(mNfcAdapter.EXTRA_ID));
+        Toast.makeText(this, cardID, Toast.LENGTH_LONG).show();
+        if(cardID.equals(RosterCard1) || cardID.equals(RosterCard2)){
+            class_name = "CourseA";
+            showAlertDialog();
+        }
         super.onNewIntent(intent);
     }
 
