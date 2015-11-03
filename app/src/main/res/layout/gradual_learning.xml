@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/task1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/ta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="90dp"
+        android:layout_marginTop="38dp"
+        android:text="循序式學習"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/glbackmain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="36dp"
+        android:layout_toRightOf="@+id/ta"
+        android:text="回主畫面" />
+
+    <Button
+        android:id="@+id/btn_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ta"
+        android:layout_below="@+id/ta"
+        android:layout_marginTop="30dp"
+        android:text="任務一" />
+
+    <Button
+        android:id="@+id/btn_newTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/glbackmain"
+        android:layout_alignBottom="@+id/glbackmain"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp"
+        android:text="新增任務" />
+
+</RelativeLayout>

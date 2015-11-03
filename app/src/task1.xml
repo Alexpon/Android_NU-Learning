@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Task ID="1" amount="3" order="yes">
+
+    <tag id="CAC446EE" name="電" seg="1" finish="NO"></tag>
+
+    <tag id="509E38CD" name="管" seg="2" finish="NO"></tag>
+
+    <tag id="509ED4ED" name="所" seg="3" finish="NO"></tag>
+	
+    <instruction content="依照順序集滿『電管所』即可過關 " title="集字遊戲"/>
+    
+    <Day year="2014" month="4" day="10" hour="23" min="59" sec="59"/>
+        
+</Task>
