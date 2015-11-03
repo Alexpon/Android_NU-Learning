@@ -1,7 +1,7 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 <?php
-	$con = mysqli_connect("address", "username", "password", "db");
+	$con = mysqli_connect("address", "un", "pw", "db");
 
 	$name = $_POST["name"];
 	$username = $_POST["username"];
