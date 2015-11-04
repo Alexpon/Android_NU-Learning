@@ -4,13 +4,6 @@ package mbp.alexpon.com.nu_learning;
  * Created by apple on 15/6/4.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.Socket;
-import java.util.Arrays;
-
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -24,31 +17,28 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 
 public class IE_Main extends Activity{
 
-    static TextView txt_name;
-    static String str1="0";
-    static String str2="0";
-    static String str3="0";
     private SharedPreferences loginPreferences;
     public static final String TAG = "NfcDemo";
     public static final String MIME_TEXT_PLAIN = "text/plain";
 
+    private String answer;
+    private TextView user;
+    private TextView title;
+    private TextView ans;
     private Button btn_backmain;
-    private TextView Ans;
-    private TextView show02;
     private NfcAdapter mNfcAdapter;
-    static Socket socket;
-    static InputStream in;
-    static OutputStream out;
-    private Handler handler = new Handler();
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,23 +47,19 @@ public class IE_Main extends Activity{
         initViews();
         setListener();
 
-        Thread t = new thread();
-        t.start();
-        handleIntent(getIntent());
 
     }
 
     public void initViews(){
-        Ans = (TextView) findViewById(R.id.Ans);
-        btn_backmain = (Button) findViewById(R.id.btn_backmain);
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        show02 =(TextView)findViewById(R.id.show02);
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        str1 = loginPreferences.getString("Name", "");
-        TextView ans = (TextView) findViewById(R.id.Ans);
-        TextView tv = (TextView) findViewById(R.id.txt_username);
-        tv.setText(str1);
-        str2 =  Ans.getText().toString();
+
+        user = (TextView) findViewById(R.id.txt_username);
+        title = (TextView) findViewById(R.id.title);
+        ans = (TextView) findViewById(R.id.answer);
+        btn_backmain = (Button) findViewById(R.id.btn_backmain);
+
+        user.setText(loginPreferences.getString("Name", ""));
     }
 
     public void setListener(){
@@ -90,55 +76,6 @@ public class IE_Main extends Activity{
         }
     };
 
-    private Runnable receive_run = new Runnable(){
-
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-            while(socket.isConnected())
-            {
-                byte[] rebyte = new byte[256];
-                try
-                {
-                    in.read(rebyte);
-                    str3 = new String(rebyte);
-                    handler.post(new Runnable(){
-                        @Override
-                        public void run() {
-                            // TODO Auto-generated method stub
-                            show02.setText(str3);
-                            Ans.setText("");
-                        }});
-
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }};
-
-    class thread extends Thread{
-        public void run() {
-            try{
-                //int servPort=5000;
-
-                socket = MainActivity.socket;
-                in=socket.getInputStream();
-                out=socket.getOutputStream();
-//				String Ans_who = str2+ "-"+ str1;
-//				byte[] sendstr = new byte[256];
-//				System.arraycopy(Ans_who.getBytes(), 0, sendstr, 0, Ans_who.length());
-//				out.write(sendstr);
-//				out.flush();
-//				out.close();
-                Thread receive = new Thread(receive_run);
-                receive.start();
-                Log.d("send","OutputStream");
-            }catch(Exception e){
-                Log.d("send",e.getMessage());
-            }
-        }
-    }
 
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
@@ -146,16 +83,15 @@ public class IE_Main extends Activity{
 
             String type = intent.getType();
             if (MIME_TEXT_PLAIN.equals(type)) {
-
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
                 new NdefReaderTask().execute(tag);
-
-            } else {
+            }
+            else {
                 Log.d(TAG, "Wrong mime type: " + type);
             }
-        } else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
+        }
+        else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
 
-            // In case we would still use the Tech Discovered Intent
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             String[] techList = tag.getTechList();
             String searchedTech = Ndef.class.getName();
@@ -173,8 +109,6 @@ public class IE_Main extends Activity{
     @Override
     protected void onResume() {
         super.onResume();
-//         It's important, that the activity is in the foreground (resumed).
-//         Otherwise an IllegalStateException is thrown.
         setupForegroundDispatch(this, mNfcAdapter);
     }
 
@@ -200,7 +134,7 @@ public class IE_Main extends Activity{
 
         Adapter.enableForegroundDispatch(ie_Main, pendingIntent, filters, techList);
     }
-    //    Call this before onPause, otherwise an IllegalArgumentException is thrown as well.
+
     @Override
     protected void onPause() {
         stopForegroundDispatch(this, mNfcAdapter);
@@ -211,14 +145,14 @@ public class IE_Main extends Activity{
         Adapter.disableForegroundDispatch(ie_Main);
     }
 
-    //    this method gets called, when the user attaches a Tag to the device.
     @Override
     protected void onNewIntent(Intent intent) {
         handleIntent(intent);
     }
 
+    public class NdefReaderTask extends AsyncTask<Tag, Void, String> {
 
-    private class NdefReaderTask extends AsyncTask<Tag, Void, String> {
+        public static final String TAG = "NfcDemo";
 
         @Override
         protected String doInBackground(Tag... params) {
@@ -275,20 +209,13 @@ public class IE_Main extends Activity{
         @Override
         protected void onPostExecute(String result) {
             if (result != null) {
-                Ans.setText(result);
-                str2 = result;
-                try{
-                    String Ans_who = str2+ "-"+ str1;
-                    byte[] sendstr = new byte[256];
-                    System.arraycopy(Ans_who.getBytes(), 0, sendstr, 0, Ans_who.length());
-                    out.write(sendstr);
-                    out.flush();
-                    Log.d("send","OutputStream");
-                }catch(Exception e){
-                    Log.d("send",e.getMessage());
-                }
+                ans.setText("你的答案：" + result);
+                answer = result;
+                Toast.makeText(getApplication(), result, Toast.LENGTH_SHORT).show();
             }
         }
-
     }
+
+
+
 }

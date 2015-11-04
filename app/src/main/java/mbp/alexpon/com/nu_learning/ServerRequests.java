@@ -135,9 +135,9 @@ public class ServerRequests {
 
                 HttpEntity entity = httpResponse.getEntity();
                 result = EntityUtils.toString(entity);
-                Log.i("ERRRR", result);
+                //Log.i("ERRRR", result);
                 //JSONObject jsonObject = new JSONObject(result);
-               JSONArray jsonArray = new JSONArray(result);
+                JSONArray jsonArray = new JSONArray(result);
 
 
                 if(jsonArray.length() == 0){
@@ -232,36 +232,38 @@ public class ServerRequests {
         @Override
         protected Integer doInBackground(Void... params) {
             ArrayList<NameValuePair> dataToSend = new ArrayList<>();
-            dataToSend.add(new BasicNameValuePair("username", teacherId));
+            dataToSend.add(new BasicNameValuePair("teacher_id", teacherId));
 
             HttpParams httpRequestParams = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(httpRequestParams, CONNECTION_TIMEOUT);
             HttpConnectionParams.setSoTimeout(httpRequestParams, CONNECTION_TIMEOUT);
 
             HttpClient client = new DefaultHttpClient(httpRequestParams);
-            HttpPost post = new HttpPost(SERVER_ADDRESS + "NUFetchTeacherQuiz.php");
+            HttpPost post = new HttpPost(SERVER_ADDRESS + "NUFetchTeacher.php");
 
-            int switcher = 0;
+            int question = 0;
             try {
                 post.setEntity(new UrlEncodedFormEntity(dataToSend));
                 HttpResponse httpResponse = client.execute(post);
 
                 HttpEntity entity = httpResponse.getEntity();
                 String result = EntityUtils.toString(entity);
-                JSONObject jsonObject = new JSONObject(result);
+                JSONArray jsonArray = new JSONArray(result);
+                //JSONObject jsonObject = new JSONObject(result);
 
-                if(jsonObject.length() == 0){
-                    switcher = 0;
+                if(jsonArray.length() == 0){
+                    question = 0;
                 }
                 else{
-                    switcher = jsonObject.getInt("switcher");
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                    question = jsonObject.getInt("question");
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            return switcher;
+            return question;
         }
 
         @Override

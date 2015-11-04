@@ -28,7 +28,7 @@ import java.util.Arrays;
 public class MainActivity extends Activity {
 
 
-    public static final String TAG = "NfcDemo";
+
     public static final String RosterCard1 = "EDF5A050";
     public static final String RosterCard2 = "0D7D9D50";
     public String class_name = "";
@@ -39,14 +39,7 @@ public class MainActivity extends Activity {
     private Button btn_IE;
     private TextView info;
 
-    private static String str1="0",str2="0";
-    public static Socket socket;
-    static InputStream in;
-    static OutputStream out;
-
     private UserLocalStore userLocalStore;
-
-    public static final String MIME_TEXT_PLAIN = "text/plain";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +48,7 @@ public class MainActivity extends Activity {
         initViews();
         checkNfc();
         setListener();
-
-        handleIntent(getIntent());
-        //Thread t = new thread();
-        //t.start();
     }
-
 
     public void initViews(){
         info = (TextView) findViewById(R.id.info);
@@ -190,16 +178,18 @@ public class MainActivity extends Activity {
         ServerRequests serverRequests = new ServerRequests(this);
         serverRequests.fetchTeacherQuizInBackground(teacherId, new GetSwitcherCallBack() {
             @Override
-            public void done(int switcher) {
-                if(switcher==1){
-                    Toast.makeText(getApplicationContext(), "Success!!", Toast.LENGTH_SHORT).show();
-                    //Intent intent = new Intent(MainActivity.this, IE_Main.class);
-                    //startActivity(intent);
-                }
-                else {
+            public void done(int question_num) {
+                if(question_num==0){
                     Toast.makeText(getApplicationContext(), "It is not a quiz time!", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(getApplicationContext(), "Switcher = " + switcher, Toast.LENGTH_SHORT).show();
+                else {
+                    Toast.makeText(getApplicationContext(), "Success!!"+question_num, Toast.LENGTH_SHORT).show();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("question_num", question_num);
+                    Intent intent = new Intent(MainActivity.this, IE_Main.class);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }
             }
         });
     }
@@ -223,13 +213,12 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        //resolveIntent(intent);
         String cardID = ByteArrayToHexString(intent.getByteArrayExtra(mNfcAdapter.EXTRA_ID));
-        Toast.makeText(this, cardID, Toast.LENGTH_LONG).show();
         if(cardID.equals(RosterCard1) || cardID.equals(RosterCard2)){
             class_name = "CourseA";
             showAlertDialog();
         }
+        //resolveIntent(intent);
         super.onNewIntent(intent);
     }
 
@@ -287,136 +276,5 @@ public class MainActivity extends Activity {
         myAlertDialog.show();
     }
 
-    private void resolveIntent(Intent intent){
-        Log.i("NFC", "In resolve intent");
-        String action = intent.getAction();
-
-        if(NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            Log.i("NFC", "ACTION NDEF DISCOVERED");
-            String type = intent.getType();
-            if(MIME_TEXT_PLAIN.equals(type)){
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                new NdefReaderTask().execute(tag);
-            }
-            else{
-                Log.i("NFC", "Wrong mime type: "+type);
-            }
-
-        }
-        else if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
-            Log.i("NFC", "ACTION TECH DISCOVERED");
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            String[] techList = tag.getTechList();
-            String searchedTech = Ndef.class.getName();
-
-            for (String tech : techList) {
-                if (searchedTech.equals(tech)) {
-                    new NdefReaderTask().execute(tag);
-                    break;
-                }
-            }
-        }
-        else if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)) {
-            Log.i("NFC", "ACTION TAG DISCOVERED");
-        }
-        else{
-            Log.i("NFC", "UNKNOW INTENT");
-            return;
-        }
-    }
-
-
-    private class NdefReaderTask extends AsyncTask<Tag, Void, String> {
-
-        @Override
-        protected String doInBackground(Tag... params) {
-            Tag tag = params[0];
-
-            Ndef ndef = Ndef.get(tag);
-            if (ndef == null) {
-                // NDEF is not supported by this Tag.
-                return null;
-            }
-
-            NdefMessage ndefMessage = ndef.getCachedNdefMessage();
-
-            NdefRecord[] records = ndefMessage.getRecords();
-            for (NdefRecord ndefRecord : records) {
-                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays.equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
-                    try {
-                        return readText(ndefRecord);
-                    } catch (UnsupportedEncodingException e) {
-                        Log.e(TAG, "Unsupported Encoding", e);
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private String readText(NdefRecord record) throws UnsupportedEncodingException {
-	        /*
-	         * See NFC forum specification for "Text Record Type Definition" at 3.2.1
-	         *
-	         * http://www.nfc-forum.org/specs/
-	         *
-	         * bit_7 defines encoding
-	         * bit_6 reserved for future use, must be 0
-	         * bit_5..0 length of IANA language code
-	         */
-
-            byte[] payload = record.getPayload();
-
-            // Get the Text Encoding
-            String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
-
-            // Get the Language Code
-            int languageCodeLength = payload[0] & 0063;
-
-            // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-            // e.g. "en"
-
-            // Get the Text
-            return new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
-                str2 = result;
-            }
-        }
-    }
-
-
-
-    private void handleIntent(Intent intent) {
-        // TODO Auto-generated method stub
-
-    }
-
-    class thread extends Thread{
-        public void run() {
-            try{
-                int servPort=5000;
-                sleep(5000);
-                socket = new Socket("192.168.2.115",servPort);
-                in=socket.getInputStream();
-                out=socket.getOutputStream();
-                str1 = "@-" + str1;
-                Log.d("Name", str1);
-
-                byte[] sendstr = new byte[256];
-                System.arraycopy(str1.getBytes(), 0, sendstr, 0, str1.length());
-                out.write(sendstr);
-                out.flush();
-                Log.d("sendd","OutputStream");
-            }
-            catch(Exception e){
-                Log.d("send",e.getMessage());
-            }
-        }
-    }
 
 }
