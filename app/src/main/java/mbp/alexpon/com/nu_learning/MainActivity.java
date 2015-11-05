@@ -136,9 +136,9 @@ public class MainActivity extends Activity {
         Time t = new Time(Time.getCurrentTimezone());
         t.setToNow();
         int year = t.year;
-        int month = t.month+1; //?
+        int month = t.month+1;
         int date = t.monthDay;
-        int hour = t.hour; // 0-23
+        int hour = t.hour;
         int minute = t.minute;
         int second = t.second;
         DateTime dateTime = new DateTime(year, month, date, hour, minute, second);
@@ -183,16 +183,39 @@ public class MainActivity extends Activity {
                     Toast.makeText(getApplicationContext(), "It is not a quiz time!", Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    NewQuizRecord(question_num);
                     Toast.makeText(getApplicationContext(), "Success!!"+question_num, Toast.LENGTH_SHORT).show();
-                    Bundle bundle = new Bundle();
+                    /*Bundle bundle = new Bundle();
                     bundle.putInt("question_num", question_num);
                     Intent intent = new Intent(MainActivity.this, IE_Main.class);
                     intent.putExtras(bundle);
-                    startActivity(intent);
+                    startActivity(intent);*/
                 }
             }
         });
     }
+
+    public void NewQuizRecord(final int question_num){
+        User user = userLocalStore.getLoggedInUser();
+        Time t = new Time(Time.getCurrentTimezone());
+        t.setToNow();
+        int year = t.year;
+        int month = t.month+1;
+        int date = t.monthDay;
+        DateTime dateTime = new DateTime(year, month, date);
+        ServerRequests serverRequests = new ServerRequests(this);
+        serverRequests.newQuizRecordInBackground(user, dateTime, new GetAnswerCallBack() {
+            @Override
+            public void done(String com) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("question_num", question_num);
+                Intent intent = new Intent(MainActivity.this, IE_Main.class);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+    }
+
 
     public void checkNfc(){
 

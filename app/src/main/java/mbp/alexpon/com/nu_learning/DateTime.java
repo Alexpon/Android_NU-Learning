@@ -15,4 +15,13 @@ public class DateTime {
         this.minute = minute;
         this.second = second;
     }
+
+    public DateTime(int year, int month, int date){
+        this.year = year;
+        this.month = month;
+        this.date = date;
+        this.hour = 0;
+        this.minute = 0;
+        this.second = 0;
+    }
 }

@@ -57,6 +57,17 @@ public class ServerRequests {
         new fetchTeacherQuizAsyncTask(teacherId, callback).execute();
     }
 
+    public void newQuizRecordInBackground(User user, DateTime dateTime, GetAnswerCallBack answerCallBack) {
+        progressDialog.show();
+        new newQuizRecordAsyncTask(user, dateTime, answerCallBack).execute();
+    }
+
+    public void uploadAnswerInBackground(User user, DateTime dateTime, int question_no, String answer, GetAnswerCallBack answerCallBack) {
+        progressDialog.show();
+        new uploadAnswerAsyncTask(user, dateTime, question_no, answer, answerCallBack).execute();
+    }
+
+
     public class storeUserDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
         User user;
@@ -271,6 +282,104 @@ public class ServerRequests {
             progressDialog.dismiss();
             switcherCallback.done(returnedUser);
             super.onPostExecute(returnedUser);
+        }
+    }
+
+    public class newQuizRecordAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        User user;
+        DateTime dateTime;
+        GetAnswerCallBack answerCallBack;
+
+        public newQuizRecordAsyncTask(User user, DateTime dateTime, GetAnswerCallBack answerCallBack) {
+            this.user = user;
+            this.dateTime = dateTime;
+            this.answerCallBack = answerCallBack;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            ArrayList<NameValuePair> dataToSend = new ArrayList<>();
+            dataToSend.add(new BasicNameValuePair("student_id", user.getUsername()));
+            dataToSend.add(new BasicNameValuePair("student_name", user.getName()));
+            dataToSend.add(new BasicNameValuePair("department", user.getDepartment()));
+            dataToSend.add(new BasicNameValuePair("year", dateTime.year+""));
+            dataToSend.add(new BasicNameValuePair("month", dateTime.month+""));
+            dataToSend.add(new BasicNameValuePair("date", dateTime.date+""));
+
+            HttpParams httpRequestParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpRequestParams, CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(httpRequestParams, CONNECTION_TIMEOUT);
+
+            HttpClient client = new DefaultHttpClient(httpRequestParams);
+            HttpPost post = new HttpPost(SERVER_ADDRESS + "NUNewQuizRecord.php");
+
+            try {
+                post.setEntity(new UrlEncodedFormEntity(dataToSend));
+                client.execute(post);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressDialog.dismiss();
+            answerCallBack.done("Success");
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    public class uploadAnswerAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        User user;
+        DateTime dateTime;
+        int question_no;
+        String answer;
+        GetAnswerCallBack answerCallBack;
+
+        public uploadAnswerAsyncTask(User user, DateTime dateTime, int question_no, String answer, GetAnswerCallBack answerCallBack) {
+            this.user = user;
+            this.dateTime = dateTime;
+            this.question_no = question_no;
+            this.answer = answer;
+            this.answerCallBack = answerCallBack;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            ArrayList<NameValuePair> dataToSend = new ArrayList<>();
+            dataToSend.add(new BasicNameValuePair("student_id", user.getUsername()));
+            dataToSend.add(new BasicNameValuePair("year", dateTime.year+""));
+            dataToSend.add(new BasicNameValuePair("month", dateTime.month+""));
+            dataToSend.add(new BasicNameValuePair("date", dateTime.date+""));
+            dataToSend.add(new BasicNameValuePair("question_no", question_no+""));
+            dataToSend.add(new BasicNameValuePair("answer", answer));
+
+            HttpParams httpRequestParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpRequestParams, CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(httpRequestParams, CONNECTION_TIMEOUT);
+
+            HttpClient client = new DefaultHttpClient(httpRequestParams);
+            HttpPost post = new HttpPost(SERVER_ADDRESS + "NUUploadAnswer.php");
+
+            try {
+                post.setEntity(new UrlEncodedFormEntity(dataToSend));
+                client.execute(post);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressDialog.dismiss();
+            answerCallBack.done("Success");
+            super.onPostExecute(aVoid);
         }
     }
 }

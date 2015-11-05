@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="41dp"
-        android:text="題目01"
+        android:text="題目 1"
         android:textSize="50sp"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -53,6 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="送出答案"
+        android:id="@+id/ie_submit"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />

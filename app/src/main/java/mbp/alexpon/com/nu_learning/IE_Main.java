@@ -17,6 +17,7 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -34,23 +35,27 @@ public class IE_Main extends Activity{
     public static final String MIME_TEXT_PLAIN = "text/plain";
 
     private String answer;
+    private int total_question;
+    private int question_no;
     private TextView user;
     private TextView title;
     private TextView ans;
     private Button btn_backmain;
+    private Button btn_submit;
     private NfcAdapter mNfcAdapter;
-
+    private UserLocalStore userLocalStore;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.interactive_examination);
         initViews();
         setListener();
-
-
     }
 
     public void initViews(){
+        Bundle bundle =this.getIntent().getExtras();
+        total_question = bundle.getInt("question_num");
+        question_no = 1;
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
 
@@ -58,23 +63,57 @@ public class IE_Main extends Activity{
         title = (TextView) findViewById(R.id.title);
         ans = (TextView) findViewById(R.id.answer);
         btn_backmain = (Button) findViewById(R.id.btn_backmain);
-
+        btn_submit = (Button) findViewById(R.id.ie_submit);
+        userLocalStore = new UserLocalStore(this);
         user.setText(loginPreferences.getString("Name", ""));
+        title.setText("題目 "+question_no);
     }
 
     public void setListener(){
         btn_backmain.setOnClickListener(myListener);
+        btn_submit.setOnClickListener(myListener);
     }
 
     private Button.OnClickListener myListener = new Button.OnClickListener(){
         @Override
         public void onClick(View v){
-            Intent data = new Intent();
-            data.setClass(IE_Main.this, MainActivity.class);
-            startActivity(data);
-            IE_Main.this.finish();
+            switch (v.getId()) {
+                case R.id.btn_backmain:
+                    Intent data = new Intent();
+                    data.setClass(IE_Main.this, MainActivity.class);
+                    startActivity(data);
+                    IE_Main.this.finish();
+                    break;
+                case R.id.ie_submit:
+                    uploadToServer();
+                    break;
+            }
         }
     };
+
+    private void uploadToServer(){
+        User user = userLocalStore.getLoggedInUser();
+        Time t = new Time(Time.getCurrentTimezone());
+        t.setToNow();
+        int year = t.year;
+        int month = t.month+1;
+        int date = t.monthDay;
+        DateTime dateTime = new DateTime(year, month, date);
+        ServerRequests serverRequests = new ServerRequests(this);
+        serverRequests.uploadAnswerInBackground(user, dateTime, question_no, answer, new GetAnswerCallBack() {
+            @Override
+            public void done(String com) {
+                Toast.makeText(getApplication(), com, Toast.LENGTH_SHORT).show();
+                question_no++;
+                if(total_question < question_no){
+                    title.setText("你已完成所有測驗");
+                }
+                else{
+                    title.setText("題目 "+question_no);
+                }
+            }
+        });
+    }
 
 
     private void handleIntent(Intent intent) {
