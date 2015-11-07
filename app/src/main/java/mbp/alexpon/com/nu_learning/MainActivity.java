@@ -97,7 +97,8 @@ public class MainActivity extends Activity {
                 case R.id.btn_IE:
                     Intent ieIntent = new Intent();
                     if(authenticate()) {
-                        is_start_quiz();
+                        //is_start_quiz();
+                        NewQuizRecord(5);
                     }
                     else{
                         ieIntent.setClass(MainActivity.this, Login.class);
@@ -208,7 +209,8 @@ public class MainActivity extends Activity {
             @Override
             public void done(String com) {
                 Bundle bundle = new Bundle();
-                bundle.putInt("question_num", question_num);
+                //bundle.putInt("question_num", question_num);
+                bundle.putInt("question_num", 5);
                 Intent intent = new Intent(MainActivity.this, IE_Main.class);
                 intent.putExtras(bundle);
                 startActivity(intent);

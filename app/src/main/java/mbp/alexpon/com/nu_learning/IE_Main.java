@@ -55,6 +55,7 @@ public class IE_Main extends Activity{
     public void initViews(){
         Bundle bundle =this.getIntent().getExtras();
         total_question = bundle.getInt("question_num");
+        Log.i("TTTT", total_question+"");
         question_no = 1;
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
@@ -107,9 +108,11 @@ public class IE_Main extends Activity{
                 question_no++;
                 if(total_question < question_no){
                     title.setText("你已完成所有測驗");
+                    ans.setText("");
                 }
                 else{
                     title.setText("題目 "+question_no);
+                    ans.setText("你的答案：請感應Tag");
                 }
             }
         });
